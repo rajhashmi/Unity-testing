@@ -4,9 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | Switch scenes</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-
     <style>
       html, body {
         margin: 0;
@@ -16,33 +14,24 @@
         overflow: hidden;
         background: black;
       }
-
       #unity-container, #unity-canvas {
         width: 100vw !important;
         height: 100vh !important;
         display: block;
       }
-
       #unity-loading-bar, #unity-footer {
         position: absolute;
         bottom: 0;
         width: 100%;
       }
-
       ::-webkit-scrollbar {
         display: none;
       }
     </style>
-
-    <meta name="screen-orientation" content="landscape">
-    <meta name="x5-orientation" content="landscape">
-    <meta name="x5-fullscreen" content="true">
-    <meta name="full-screen" content="yes">
   </head>
-
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width="960" height="540" tabindex="-1"></canvas>
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -51,9 +40,7 @@
       </div>
       <div id="unity-warning"></div>
       <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
         <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Switch scenes</div>
       </div>
     </div>
 
@@ -93,28 +80,6 @@
         showBanner: unityShowBanner,
       };
 
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        function resizeCanvas() {
-          canvas.style.width = window.innerWidth + "px";
-          canvas.style.height = window.innerHeight + "px";
-        }
-        window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
-
-        setTimeout(() => window.scrollTo(0, 1), 100);
-      } else {
-        canvas.style.width = "960px";
-        canvas.style.height = "540px";
-      }
-
       document.querySelector("#unity-loading-bar").style.display = "block";
 
       var script = document.createElement("script");
@@ -124,14 +89,20 @@
           document.querySelector("#unity-progress-bar-full").style.width = (100 * progress) + "%";
         }).then((unityInstance) => {
           document.querySelector("#unity-loading-bar").style.display = "none";
-          document.querySelector("#unity-fullscreen-button").onclick = () => {
-            unityInstance.SetFullscreen(1);
-          };
+          
+          // Assign fullscreen button
+          const fullBtn = document.querySelector("#unity-fullscreen-button");
+          fullBtn.onclick = () => unityInstance.SetFullscreen(1);
 
-          // 🟢 Auto fullscreen on first touch
-          document.addEventListener("touchstart", () => {
-            unityInstance.SetFullscreen(1);
-          }, { once: true });
+          // Attempt auto fullscreen after short delay
+          setTimeout(() => {
+            try {
+              fullBtn.click(); // trigger Unity fullscreen
+              canvas.requestFullscreen(); // direct fullscreen call
+            } catch (e) {
+              console.warn("Fullscreen blocked:", e);
+            }
+          }, 1000);
 
         }).catch((message) => {
           alert(message);
