@@ -3,9 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="full-screen" content="yes">
+
     <title>Unity Web Player | Switch scenes</title>
     <link rel="stylesheet" href="TemplateData/style.css">
+
     <style>
       html, body {
         margin: 0;
@@ -14,6 +23,7 @@
         height: 100vh;
         overflow: hidden;
         background: black;
+        touch-action: none;
       }
       #unity-container, #unity-canvas {
         width: 100vw !important;
@@ -30,15 +40,18 @@
       }
     </style>
   </head>
+  
   <body>
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" tabindex="-1"></canvas>
+
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
           <div id="unity-progress-bar-full"></div>
         </div>
       </div>
+
       <div id="unity-warning"></div>
       <div id="unity-footer">
         <div id="unity-fullscreen-button"></div>
@@ -59,7 +72,7 @@
         if (type == 'error') div.style = 'background: red; padding: 10px;';
         else {
           if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
+          setTimeout(() => {
             warningBanner.removeChild(div);
             updateBannerVisibility();
           }, 5000);
@@ -90,20 +103,23 @@
           document.querySelector("#unity-progress-bar-full").style.width = (100 * progress) + "%";
         }).then((unityInstance) => {
           document.querySelector("#unity-loading-bar").style.display = "none";
-          
-          // Assign fullscreen button
+
           const fullBtn = document.querySelector("#unity-fullscreen-button");
           fullBtn.onclick = () => unityInstance.SetFullscreen(1);
 
-          // Attempt auto fullscreen after short delay
           setTimeout(() => {
             try {
-              fullBtn.click(); // trigger Unity fullscreen
-              canvas.requestFullscreen(); // direct fullscreen call
+              fullBtn.click();
+              canvas.requestFullscreen();
             } catch (e) {
               console.warn("Fullscreen blocked:", e);
             }
-          }, 1000);
+
+            setTimeout(() => window.scrollTo(0, 1), 600);
+            window.addEventListener("orientationchange", () => {
+              setTimeout(() => window.scrollTo(0, 1), 600);
+            });
+          }, 1200);
 
         }).catch((message) => {
           alert(message);
