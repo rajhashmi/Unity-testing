@@ -111,7 +111,6 @@
 
         setTimeout(() => window.scrollTo(0, 1), 100);
       } else {
-        // 💻 Desktop setup
         canvas.style.width = "960px";
         canvas.style.height = "540px";
       }
@@ -128,6 +127,12 @@
           document.querySelector("#unity-fullscreen-button").onclick = () => {
             unityInstance.SetFullscreen(1);
           };
+
+          // 🟢 Auto fullscreen on first touch
+          document.addEventListener("touchstart", () => {
+            unityInstance.SetFullscreen(1);
+          }, { once: true });
+
         }).catch((message) => {
           alert(message);
         });
