@@ -11,23 +11,30 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <style>
-      body {
+      html, body {
         margin: 0;
         padding: 0;
         background: black;
         overflow-x: hidden;
+        height: 101vh; /* extra height for scroll trigger */
         -webkit-overflow-scrolling: touch;
       }
-      .scroll-space {
-        height: 150vh;
-        width: 100%;
-        background: transparent;
-      }
+
       #unity-container, #unity-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
         display: block;
         width: 100vw;
         height: 100vh;
       }
+
+      .scroll-space {
+        height: 120vh; /* ensures there's scroll room */
+        width: 100%;
+        background: transparent;
+      }
+
       ::-webkit-scrollbar {
         display: none;
       }
@@ -35,9 +42,8 @@
   </head>
 
   <body>
-    
     <div id="unity-container">
-      <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width="960" height="540" tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -49,6 +55,7 @@
         <div id="unity-fullscreen-button"></div>
       </div>
     </div>
+
     <div class="scroll-space"></div>
 
     <script>
@@ -92,30 +99,40 @@
       const script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
-       createUnityInstance(canvas, config, (progress) => {
-  document.querySelector("#unity-progress-bar-full").style.width = (100 * progress) + "%";
-}).then((unityInstance) => {
-  document.querySelector("#unity-loading-bar").style.display = "none";
-  document.querySelector("#unity-fullscreen-button").onclick = () => unityInstance.SetFullscreen(1);
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = (100 * progress) + "%";
+        }).then((unityInstance) => {
+          document.querySelector("#unity-loading-bar").style.display = "none";
+          document.querySelector("#unity-fullscreen-button").onclick = () => unityInstance.SetFullscreen(1);
 
-  // ✅ Scroll AFTER Unity is ready
-  setTimeout(() => {
-    console.log(document.body.scrollHeight, window.innerHeight);
+          // ✅ Smart mobile scroll trick to hide bars
+          setTimeout(() => {
+            // Tiny scroll jump to trigger browser UI hide
+            window.scrollTo(0, 1);
+            setTimeout(() => {
+              window.scrollTo(0, 0);
+              // Smooth scroll down to give illusion of interaction
+              window.scrollTo({ top: 200, behavior: 'smooth' });
+            }, 100);
+          }, 1000);
 
-    window.scrollTo({ top: 300, behavior: 'smooth' });
-  }, 1000); // 1 second delay ensures Unity finished setting layout
+          // ✅ Maintain it on orientation change
+          window.addEventListener("orientationchange", () => {
+            setTimeout(() => {
+              window.scrollTo(0, 1);
+              setTimeout(() => window.scrollTo({ top: 200, behavior: 'smooth' }), 100);
+            }, 700);
+          });
 
-  // keep it stable on resize or rotate
-  window.addEventListener("orientationchange", () => {
-    setTimeout(() => window.scrollTo({ top: 300, behavior: 'smooth' }), 500);
-  });
+          // ✅ Maintain on resize (esp. iOS Safari)
+          window.addEventListener("resize", () => {
+            setTimeout(() => {
+              window.scrollTo(0, 1);
+              setTimeout(() => window.scrollTo({ top: 200, behavior: 'smooth' }), 100);
+            }, 700);
+          });
 
-  window.addEventListener("resize", () => {
-    setTimeout(() => window.scrollTo({ top: 300, behavior: 'smooth' }), 500);
-  });
-
-}).catch((message) => alert(message));
-
+        }).catch((message) => alert(message));
       };
       document.body.appendChild(script);
     </script>
