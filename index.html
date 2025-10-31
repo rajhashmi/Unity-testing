@@ -35,8 +35,7 @@
   </head>
 
   <body>
-    <div class="scroll-space"></div>
-
+    
     <div id="unity-container">
       <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
@@ -50,6 +49,7 @@
         <div id="unity-fullscreen-button"></div>
       </div>
     </div>
+    <div class="scroll-space"></div>
 
     <script>
       const canvas = document.querySelector("#unity-canvas");
@@ -92,27 +92,30 @@
       const script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = (100 * progress) + "%";
-        }).then((unityInstance) => {
-          document.querySelector("#unity-loading-bar").style.display = "none";
-          document.querySelector("#unity-fullscreen-button").onclick = () => unityInstance.SetFullscreen(1);
+       createUnityInstance(canvas, config, (progress) => {
+  document.querySelector("#unity-progress-bar-full").style.width = (100 * progress) + "%";
+}).then((unityInstance) => {
+  document.querySelector("#unity-loading-bar").style.display = "none";
+  document.querySelector("#unity-fullscreen-button").onclick = () => unityInstance.SetFullscreen(1);
 
-          // Auto-scroll trick to hide mobile nav bar
-          setTimeout(() => {
-            window.scrollTo(0, 1);
-          }, 500);
+  // ✅ Scroll AFTER Unity is ready
+  setTimeout(() => {
+    console.log(document.body.scrollHeight, window.innerHeight);
 
-          // Reapply scroll on orientation change or resize
-          window.addEventListener("orientationchange", () => {
-            setTimeout(() => window.scrollTo(0, 1), 500);
-          });
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  }, 1000); // 1 second delay ensures Unity finished setting layout
 
-          window.addEventListener("resize", () => {
-            setTimeout(() => window.scrollTo(0, 1), 500);
-          });
+  // keep it stable on resize or rotate
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => window.scrollTo({ top: 300, behavior: 'smooth' }), 500);
+  });
 
-        }).catch((message) => alert(message));
+  window.addEventListener("resize", () => {
+    setTimeout(() => window.scrollTo({ top: 300, behavior: 'smooth' }), 500);
+  });
+
+}).catch((message) => alert(message));
+
       };
       document.body.appendChild(script);
     </script>
